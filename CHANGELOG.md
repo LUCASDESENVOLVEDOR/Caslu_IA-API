@@ -10,6 +10,9 @@ Versionamento: V<versão>.<melhoria>.<bugs>
 - appsettings.json com DatabaseName e configurações do Ollama (sem segredos)
 - User Secrets inicializado no projeto da API
 
+### Documentação
+- README.md com badges, diagramas Mermaid, camadas, princípios, configuração e roadmap
+
 ## [V1.00.000] - 2026-09-24 16:35:37
 ### Estrutura
 - Solução Caslu.IA criada em .NET 8 com arquitetura em camadas
