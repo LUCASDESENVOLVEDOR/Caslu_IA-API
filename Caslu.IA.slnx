@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Caslu.IA.Api/Caslu.IA.Api.csproj" />
+    <Project Path="src/Caslu.IA.Application/Caslu.IA.Application.csproj" />
+    <Project Path="src/Caslu.IA.Domain/Caslu.IA.Domain.csproj" />
+    <Project Path="src/Caslu.IA.Infrastructure/Caslu.IA.Infrastructure.csproj" />
+  </Folder>
+</Solution>
