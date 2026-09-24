@@ -2,6 +2,10 @@
 
 Versionamento: V<versão>.<melhoria>.<bugs>
 
+## [V1.01.001] - 2026-09-24 16:56:45
+### Repositório
+- .gitattributes com '* text=auto' para normalizar finais de linha e eliminar os avisos LF/CRLF do Git
+
 ## [V1.01.000] - 2026-09-24 16:43:19
 ### Configuração
 - Pacotes MongoDB.Driver e Microsoft.Extensions.Options.ConfigurationExtensions na Infrastructure
