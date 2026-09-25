@@ -31,8 +31,9 @@ public sealed class ChatController : ControllerBase
     /// <param name="request">Username, conversa (opcional) e mensagem.</param>
     /// <param name="cancellationToken">Cancelado quando o cliente encerra a requisição.</param>
     /// <returns>
-    /// 200 com a conversa e a resposta; 400 se os dados forem inválidos;
-    /// 404 se a conversa não existir para o usuário; 503 se a LLM não responder.
+    /// 200 com a conversa e a resposta; 400 se os dados forem inválidos (a mensagem é validada já sem
+    /// espaços nas pontas); 404 se a conversa não existir para o usuário; 503 se a LLM não responder
+    /// (nesse caso nada é gravado).
     /// </returns>
     [HttpPost]
     [ProducesResponseType(typeof(ChatResponse), StatusCodes.Status200OK)]
@@ -47,13 +48,14 @@ public sealed class ChatController : ControllerBase
                 detail: "O username é obrigatório.");
         }
 
-        if (string.IsNullOrWhiteSpace(request.Message))
+        var message = request.Message?.Trim();
+        if (string.IsNullOrEmpty(message))
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Requisição inválida.",
                 detail: "A mensagem é obrigatória.");
         }
 
-        if (request.Message.Length > MessageMaxLength)
+        if (message.Length > MessageMaxLength)
         {
             return Problem(statusCode: StatusCodes.Status400BadRequest, title: "Requisição inválida.",
                 detail: $"A mensagem deve ter no máximo {MessageMaxLength} caracteres.");
@@ -61,7 +63,7 @@ public sealed class ChatController : ControllerBase
 
         try
         {
-            var result = await _chatService.SendAsync(request.Username, request.ConversationId, request.Message, cancellationToken);
+            var result = await _chatService.SendAsync(request.Username, request.ConversationId, message, cancellationToken);
             if (!result.Found)
             {
                 return Problem(statusCode: StatusCodes.Status404NotFound, title: "Conversa não encontrada.",

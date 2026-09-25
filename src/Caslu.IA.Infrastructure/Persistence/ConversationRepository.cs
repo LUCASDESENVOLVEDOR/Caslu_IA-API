@@ -56,21 +56,29 @@ public sealed class ConversationRepository : IConversationRepository
     }
 
     /// <inheritdoc />
-    public async Task<ChatMessage> AddMessageAsync(string username, string conversationId, string role, string content, CancellationToken cancellationToken = default)
+    /// <remarks>
+    /// Usa um único <c>InsertMany</c>. Inserções não têm filtro: o isolamento vem do username do parâmetro,
+    /// gravado em cada documento (o username e a conversa recebidos nas mensagens são ignorados).
+    /// </remarks>
+    public async Task AddMessagesAsync(string username, string conversationId, IReadOnlyList<ChatMessage> messages, CancellationToken cancellationToken = default)
     {
         EnsureUsername(username);
 
-        var message = new ChatMessage
+        if (messages.Count == 0)
+        {
+            return;
+        }
+
+        var documents = messages.Select(m => new ChatMessage
         {
             Username = username,
             ConversationId = conversationId,
-            Role = role,
-            Content = content,
-            CreatedAt = DateTime.UtcNow
-        };
+            Role = m.Role,
+            Content = m.Content,
+            CreatedAt = m.CreatedAt
+        }).ToList();
 
-        await _messages.InsertOneAsync(message, cancellationToken: cancellationToken);
-        return message;
+        await _messages.InsertManyAsync(documents, cancellationToken: cancellationToken);
     }
 
     /// <inheritdoc />

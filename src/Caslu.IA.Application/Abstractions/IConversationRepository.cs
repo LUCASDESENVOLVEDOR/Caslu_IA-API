@@ -27,15 +27,15 @@ public interface IConversationRepository
     Task<Conversation?> GetAsync(string username, string conversationId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Adiciona uma mensagem a uma conversa do usuário.
+    /// Adiciona várias mensagens a uma conversa do usuário numa única operação.
+    /// O username e a conversa de cada mensagem gravada são sempre os informados nos parâmetros.
     /// </summary>
     /// <param name="username">Username normalizado do dono da conversa.</param>
     /// <param name="conversationId">Identificador da conversa.</param>
-    /// <param name="role">Papel do autor (ver constantes de <see cref="ChatMessage"/>).</param>
-    /// <param name="content">Texto da mensagem.</param>
+    /// <param name="messages">Mensagens a gravar (papel, texto e data de criação), na ordem em que ocorreram.</param>
     /// <param name="cancellationToken">Token para cancelar a operação.</param>
-    /// <returns>A mensagem gravada.</returns>
-    Task<ChatMessage> AddMessageAsync(string username, string conversationId, string role, string content, CancellationToken cancellationToken = default);
+    /// <returns>Uma tarefa que representa a operação.</returns>
+    Task AddMessagesAsync(string username, string conversationId, IReadOnlyList<ChatMessage> messages, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Busca as últimas mensagens de uma conversa do usuário.

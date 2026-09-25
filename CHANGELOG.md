@@ -2,6 +2,15 @@
 
 Versionamento: V<versão>.<melhoria>.<bugs>
 
+## [V1.03.001] - 2026-09-25 18:05:02
+### Correções do chat
+- ChatService só grava depois da resposta da LLM: se a LLM falhar, nada é gravado (nem perfil, nem conversa, nem mensagens) e a API continua retornando 503
+- Conversa informada e histórico lidos antes da chamada à LLM; contexto montado em memória (SystemPrompt, perfil, histórico e mensagem nova), com a janela HistoryLimit contando a mensagem nova
+- Conversa nova criada só após a resposta; mensagem do usuário e resposta gravadas numa única operação (AddMessagesAsync com InsertMany); AddMessageAsync removido
+- CreatedAt da mensagem do usuário = chegada da requisição; CreatedAt da resposta = momento em que a LLM respondeu
+- conversationId vazio ou só com espaços é tratado como null (conversa nova)
+- Mensagem passa por Trim antes da validação e da gravação; o limite de 4000 caracteres vale para o texto sem espaços nas pontas
+
 ## [V1.03.000] - 2026-09-25 17:50:07
 ### Chat Nível 0 com memória em camadas
 - Domain: entidades UserProfile (camada 1, perfil global; username normalizado), Conversation e ChatMessage (camada 2)
