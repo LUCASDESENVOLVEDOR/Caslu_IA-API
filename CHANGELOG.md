@@ -2,6 +2,14 @@
 
 Versionamento: V<versão>.<melhoria>.<bugs>
 
+## [V1.04.000] - 2026-09-25 19:04:18
+### Streaming do chat via SSE (Etapa 5)
+- ILlmClient.StreamAsync: resposta da LLM em pedaços (IAsyncEnumerable<string>), com CancellationToken
+- OllamaLlmClient.StreamAsync: POST /api/chat com stream true, ResponseHeadersRead e leitura linha a linha (NDJSON), no mesmo HttpClient tipado; falha de conexão, HTTP de erro, erro ou queda no meio do stream viram LlmUnavailableException; limite total de TimeoutSeconds via CancellationTokenSource vinculado ao token recebido
+- ChatService.StreamAsync: mesma preparação do SendAsync (extraída para PrepareAsync) e mesma gravação (extraída para SaveAsync); repassa os pedaços conforme chegam e só grava quando o stream termina com sucesso; falha da LLM, resposta vazia ou cancelamento: nada é gravado
+- POST /api/chat/stream: 400, 404 e 503 como ProblemDetails antes de abrir o stream; stream SSE só depois que a LLM começa a responder; eventos delta, done e error com data em JSON de uma linha; flush a cada evento; cabeçalhos Cache-Control no-cache e X-Accel-Buffering no; cancelamento do cliente repassado até o Ollama
+- POST /api/chat sem mudança de comportamento (validações e respostas de erro compartilhadas com o endpoint de streaming)
+
 ## [V1.03.002] - 2026-09-25 18:42:56
 ### Correções do chat
 - conversationId preenchido passa por Trim antes da busca (" 6ab... " encontra a conversa normalmente)
