@@ -1,4 +1,5 @@
 using Caslu.IA.Infrastructure.Configuration;
+using Caslu.IA.Infrastructure.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -12,7 +13,7 @@ namespace Caslu.IA.Infrastructure;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Registra as opções e os serviços de infraestrutura (MongoDB e Ollama) no contêiner de dependências.
+    /// Registra as opções, os serviços de infraestrutura (MongoDB e Ollama) e os health checks no contêiner de dependências.
     /// </summary>
     /// <param name="services">Coleção de serviços da aplicação.</param>
     /// <param name="configuration">Configuração da aplicação.</param>
@@ -48,6 +49,17 @@ public static class DependencyInjection
             var options = sp.GetRequiredService<IOptions<MongoDbOptions>>().Value;
             return sp.GetRequiredService<IMongoClient>().GetDatabase(options.DatabaseName);
         });
+
+        services.AddHttpClient<OllamaHealthCheck>((sp, client) =>
+        {
+            var options = sp.GetRequiredService<IOptions<OllamaOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(5);
+        });
+
+        services.AddHealthChecks()
+            .AddCheck<MongoHealthCheck>("mongodb", tags: ["db"])
+            .AddCheck<OllamaHealthCheck>("llm", tags: ["llm"]);
 
         return services;
     }

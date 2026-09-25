@@ -2,6 +2,14 @@
 
 Versionamento: V<versão>.<melhoria>.<bugs>
 
+## [V1.02.000] - 2026-09-25 17:16:12
+### Health check
+- FrameworkReference Microsoft.AspNetCore.App na Infrastructure (IHealthCheck e AddHttpClient)
+- MongoHealthCheck: executa { ping: 1 } no MongoDB; Unhealthy com a mensagem do erro, sem expor a connection string
+- OllamaHealthCheck: HttpClient tipado (BaseUrl de OllamaOptions, timeout de 5 s) consultando GET /api/tags; Healthy com o modelo instalado, Degraded sem o modelo, Unhealthy sem resposta ou em timeout
+- Health checks registrados em AddInfrastructure: "mongodb" (tag db) e "llm" (tag llm)
+- Endpoint /health com resposta JSON (status, totalDurationMs e checks com name, status, durationMs e description)
+
 ## [V1.01.001] - 2026-09-24 16:56:45
 ### Repositório
 - .gitattributes com '* text=auto' para normalizar finais de linha e eliminar os avisos LF/CRLF do Git
