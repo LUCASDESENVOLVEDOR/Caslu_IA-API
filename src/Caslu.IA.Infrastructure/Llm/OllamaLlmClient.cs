@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Caslu.IA.Application.Abstractions;
 using Caslu.IA.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
@@ -34,7 +35,7 @@ public sealed class OllamaLlmClient : ILlmClient
     /// <inheritdoc />
     public async Task<string> CompleteAsync(IReadOnlyList<LlmMessage> messages, CancellationToken cancellationToken = default)
     {
-        var request = new ChatRequest(_options.Model, messages, Stream: false);
+        var request = CreateRequest(messages, stream: false);
 
         ChatResponse? response;
         try
@@ -88,7 +89,7 @@ public sealed class OllamaLlmClient : ILlmClient
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "/api/chat")
         {
-            Content = JsonContent.Create(new ChatRequest(_options.Model, messages, Stream: true))
+            Content = JsonContent.Create(CreateRequest(messages, stream: true))
         };
 
         using var response = await GuardAsync(
@@ -191,12 +192,29 @@ public sealed class OllamaLlmClient : ILlmClient
     }
 
     /// <summary>
+    /// Monta o corpo do <c>POST /api/chat</c> com o modelo, as mensagens e as opções configuradas
+    /// (inclusive o tamanho do contexto, <c>num_ctx</c>).
+    /// </summary>
+    /// <param name="messages">Mensagens do contexto.</param>
+    /// <param name="stream"><c>true</c> para receber a resposta em pedaços.</param>
+    /// <returns>O corpo da requisição.</returns>
+    private ChatRequest CreateRequest(IReadOnlyList<LlmMessage> messages, bool stream) =>
+        new(_options.Model, messages, stream, new ChatRequestOptions(_options.NumCtx));
+
+    /// <summary>
     /// Corpo da requisição <c>POST /api/chat</c>.
     /// </summary>
     /// <param name="Model">Modelo a ser usado.</param>
     /// <param name="Messages">Mensagens do contexto.</param>
     /// <param name="Stream"><c>false</c>: a resposta vem completa; <c>true</c>: vem em pedaços, uma linha JSON por pedaço.</param>
-    private sealed record ChatRequest(string Model, IReadOnlyList<LlmMessage> Messages, bool Stream);
+    /// <param name="Options">Opções do modelo (ex.: tamanho do contexto).</param>
+    private sealed record ChatRequest(string Model, IReadOnlyList<LlmMessage> Messages, bool Stream, ChatRequestOptions Options);
+
+    /// <summary>
+    /// Opções do modelo enviadas no <c>POST /api/chat</c>.
+    /// </summary>
+    /// <param name="NumCtx">Tamanho da janela de contexto, em tokens (<c>num_ctx</c> no Ollama).</param>
+    private sealed record ChatRequestOptions([property: JsonPropertyName("num_ctx")] int NumCtx);
 
     /// <summary>
     /// Resposta do <c>POST /api/chat</c> (apenas os campos usados).

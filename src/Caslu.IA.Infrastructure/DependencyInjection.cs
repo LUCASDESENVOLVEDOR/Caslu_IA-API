@@ -40,6 +40,8 @@ public static class DependencyInjection
                 "Ollama:Model é obrigatório.")
             .Validate(options => options.TimeoutSeconds > 0,
                 "Ollama:TimeoutSeconds deve ser maior que zero.")
+            .Validate(options => options.NumCtx > 0,
+                "Ollama:NumCtx deve ser maior que zero.")
             .ValidateOnStart();
 
         services.AddOptions<ChatOptions>()

@@ -24,4 +24,10 @@ public sealed class OllamaOptions
     /// Tempo limite, em segundos, das requisições ao servidor Ollama.
     /// </summary>
     public int TimeoutSeconds { get; set; }
+
+    /// <summary>
+    /// Tamanho da janela de contexto do modelo, em tokens, enviado ao Ollama como <c>num_ctx</c>.
+    /// Deve ser igual ao <c>OLLAMA_CONTEXT_LENGTH</c> do servidor; valores diferentes fazem o Ollama recarregar o modelo.
+    /// </summary>
+    public int NumCtx { get; set; }
 }

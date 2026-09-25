@@ -2,6 +2,11 @@
 
 Versionamento: V<versão>.<melhoria>.<bugs>
 
+## [V1.05.000] - 2026-09-25 19:26:59
+### Contexto da LLM configurável
+- OllamaOptions.NumCtx (tamanho do contexto, em tokens) com validação > 0 no ValidateOnStart; appsettings.json com Ollama:NumCtx = 8192
+- OllamaLlmClient envia "options": { "num_ctx": NumCtx } no corpo do POST /api/chat, no CompleteAsync e no StreamAsync (health check inalterado)
+
 ## [V1.04.000] - 2026-09-25 19:04:18
 ### Streaming do chat via SSE (Etapa 5)
 - ILlmClient.StreamAsync: resposta da LLM em pedaços (IAsyncEnumerable<string>), com CancellationToken
