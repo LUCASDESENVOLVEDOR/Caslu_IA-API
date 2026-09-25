@@ -1,5 +1,9 @@
+using Caslu.IA.Application.Abstractions;
+using Caslu.IA.Application.Chat;
 using Caslu.IA.Infrastructure.Configuration;
 using Caslu.IA.Infrastructure.HealthChecks;
+using Caslu.IA.Infrastructure.Llm;
+using Caslu.IA.Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -13,7 +17,7 @@ namespace Caslu.IA.Infrastructure;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Registra as opções, os serviços de infraestrutura (MongoDB e Ollama) e os health checks no contêiner de dependências.
+    /// Registra as opções, os serviços de infraestrutura (MongoDB e Ollama), o chat e os health checks no contêiner de dependências.
     /// </summary>
     /// <param name="services">Coleção de serviços da aplicação.</param>
     /// <param name="configuration">Configuração da aplicação.</param>
@@ -38,6 +42,18 @@ public static class DependencyInjection
                 "Ollama:TimeoutSeconds deve ser maior que zero.")
             .ValidateOnStart();
 
+        services.AddOptions<ChatOptions>()
+            .Bind(configuration.GetSection(ChatOptions.SectionName))
+            .Validate(options => options.HistoryLimit > 0,
+                "Chat:HistoryLimit deve ser maior que zero.")
+            .Validate(options => !string.IsNullOrWhiteSpace(options.SystemPrompt),
+                "Chat:SystemPrompt é obrigatório.")
+            .ValidateOnStart();
+
+        services.AddSingleton(sp => sp.GetRequiredService<IOptions<ChatOptions>>().Value);
+
+        MongoMappings.Register();
+
         services.AddSingleton<IMongoClient>(sp =>
         {
             var options = sp.GetRequiredService<IOptions<MongoDbOptions>>().Value;
@@ -49,6 +65,19 @@ public static class DependencyInjection
             var options = sp.GetRequiredService<IOptions<MongoDbOptions>>().Value;
             return sp.GetRequiredService<IMongoClient>().GetDatabase(options.DatabaseName);
         });
+
+        services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+        services.AddScoped<IConversationRepository, ConversationRepository>();
+        services.AddHostedService<MongoIndexInitializer>();
+
+        services.AddHttpClient<ILlmClient, OllamaLlmClient>((sp, client) =>
+        {
+            var options = sp.GetRequiredService<IOptions<OllamaOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
+        });
+
+        services.AddScoped<ChatService>();
 
         services.AddHttpClient<OllamaHealthCheck>((sp, client) =>
         {

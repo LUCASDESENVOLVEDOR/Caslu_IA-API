@@ -2,6 +2,17 @@
 
 Versionamento: V<versão>.<melhoria>.<bugs>
 
+## [V1.03.000] - 2026-09-25 17:50:07
+### Chat Nível 0 com memória em camadas
+- Domain: entidades UserProfile (camada 1, perfil global; username normalizado), Conversation e ChatMessage (camada 2)
+- Application: IUserProfileRepository, IConversationRepository (username obrigatório em todos os métodos), ILlmClient, ChatOptions e ChatService
+- ChatService: garante o perfil, cria ou busca a conversa do usuário, grava as mensagens e monta o contexto (SystemPrompt, perfil com os campos preenchidos, últimas HistoryLimit mensagens)
+- Infrastructure: repositórios MongoDB nas collections users, conversations e messages, com filtro por username centralizado em ForUser
+- Índices criados na inicialização: conversations (Username, UpdatedAt desc) e messages (Username, ConversationId, CreatedAt)
+- OllamaLlmClient com HttpClient tipado próprio (POST /api/chat, stream false, timeout de OllamaOptions.TimeoutSeconds)
+- Seção "Chat" no appsettings.json (HistoryLimit = 20 e SystemPrompt) com ValidateOnStart
+- Api: POST /api/chat com 400 (dados inválidos), 404 (conversa não encontrada para o usuário) e 503 (LLM indisponível)
+
 ## [V1.02.000] - 2026-09-25 17:16:12
 ### Health check
 - FrameworkReference Microsoft.AspNetCore.App na Infrastructure (IHealthCheck e AddHttpClient)
