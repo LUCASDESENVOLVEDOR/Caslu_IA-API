@@ -13,9 +13,10 @@ public interface IConversationRepository
     /// </summary>
     /// <param name="username">Username normalizado do dono da conversa.</param>
     /// <param name="title">Título da conversa.</param>
+    /// <param name="createdAt">Data de criação (UTC), normalmente o momento em que a requisição chegou; também é o <see cref="Conversation.UpdatedAt"/> inicial.</param>
     /// <param name="cancellationToken">Token para cancelar a operação.</param>
     /// <returns>A conversa criada, com o identificador preenchido.</returns>
-    Task<Conversation> CreateAsync(string username, string title, CancellationToken cancellationToken = default);
+    Task<Conversation> CreateAsync(string username, string title, DateTime createdAt, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Busca uma conversa do usuário.

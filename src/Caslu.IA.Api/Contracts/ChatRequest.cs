@@ -11,7 +11,7 @@ public sealed class ChatRequest
     public string? Username { get; set; }
 
     /// <summary>
-    /// Conversa existente; <c>null</c>, vazio ou só com espaços inicia uma conversa nova.
+    /// Conversa existente (espaços nas pontas são removidos); <c>null</c>, vazio ou só com espaços inicia uma conversa nova.
     /// </summary>
     public string? ConversationId { get; set; }
 

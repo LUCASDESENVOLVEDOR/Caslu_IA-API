@@ -2,6 +2,11 @@
 
 Versionamento: V<versão>.<melhoria>.<bugs>
 
+## [V1.03.002] - 2026-09-25 18:42:56
+### Correções do chat
+- conversationId preenchido passa por Trim antes da busca (" 6ab... " encontra a conversa normalmente)
+- CreatedAt da conversa nova = momento em que a requisição chegou (receivedAt repassado ao CreateAsync, que também usa esse valor como UpdatedAt inicial)
+
 ## [V1.03.001] - 2026-09-25 18:05:02
 ### Correções do chat
 - ChatService só grava depois da resposta da LLM: se a LLM falhar, nada é gravado (nem perfil, nem conversa, nem mensagens) e a API continua retornando 503

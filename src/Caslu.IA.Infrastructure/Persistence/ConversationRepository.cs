@@ -24,17 +24,16 @@ public sealed class ConversationRepository : IConversationRepository
     }
 
     /// <inheritdoc />
-    public async Task<Conversation> CreateAsync(string username, string title, CancellationToken cancellationToken = default)
+    public async Task<Conversation> CreateAsync(string username, string title, DateTime createdAt, CancellationToken cancellationToken = default)
     {
         EnsureUsername(username);
 
-        var now = DateTime.UtcNow;
         var conversation = new Conversation
         {
             Username = username,
             Title = title,
-            CreatedAt = now,
-            UpdatedAt = now
+            CreatedAt = createdAt,
+            UpdatedAt = createdAt
         };
 
         await _conversations.InsertOneAsync(conversation, cancellationToken: cancellationToken);

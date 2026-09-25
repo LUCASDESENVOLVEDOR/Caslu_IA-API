@@ -37,7 +37,7 @@ public sealed class ChatService
     /// (nem perfil, nem conversa, nem mensagens).
     /// </summary>
     /// <param name="username">Username do usuário (será normalizado).</param>
-    /// <param name="conversationId">Conversa existente; <c>null</c>, vazio ou só com espaços inicia uma conversa nova.</param>
+    /// <param name="conversationId">Conversa existente (espaços nas pontas são removidos); <c>null</c>, vazio ou só com espaços inicia uma conversa nova.</param>
     /// <param name="message">Texto enviado pelo usuário; os espaços nas pontas são removidos antes de validar e gravar.</param>
     /// <param name="cancellationToken">Token para cancelar a operação.</param>
     /// <returns>
@@ -65,9 +65,10 @@ public sealed class ChatService
         Conversation? conversation = null;
         IReadOnlyList<ChatMessage> history = [];
 
-        if (!string.IsNullOrWhiteSpace(conversationId))
+        var requestedId = conversationId?.Trim();
+        if (!string.IsNullOrEmpty(requestedId))
         {
-            conversation = await _conversations.GetAsync(user, conversationId, cancellationToken);
+            conversation = await _conversations.GetAsync(user, requestedId, cancellationToken);
             if (conversation is null)
             {
                 return ChatResult.NotFound;
@@ -106,7 +107,7 @@ public sealed class ChatService
             await _profiles.GetOrCreateAsync(user, cancellationToken);
         }
 
-        conversation ??= await _conversations.CreateAsync(user, BuildTitle(text), cancellationToken);
+        conversation ??= await _conversations.CreateAsync(user, BuildTitle(text), receivedAt, cancellationToken);
 
         var newMessages = new List<ChatMessage>
         {
